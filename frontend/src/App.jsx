@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
-import { AuthGuard, OnboardingGuard } from '@/components/RouteGuards';
+import { AdminShell } from '@/components/AdminShell';
+import { AdminGuard, AuthGuard, OnboardingGuard } from '@/components/RouteGuards';
 import { LandingPage } from '@/pages/LandingPage';
 import { AuthPage } from '@/pages/AuthPages';
 import { OnboardingPage } from '@/pages/OnboardingPage';
@@ -14,6 +15,11 @@ import { InvoicesPage } from '@/pages/InvoicesPage';
 import { NewInvoicePage } from '@/pages/NewInvoicePage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { AdminOverviewPage } from '@/pages/admin/AdminOverviewPage';
+import { AdminCreatorsPage } from '@/pages/admin/AdminCreatorsPage';
+import { AdminCreatorDetailPage } from '@/pages/admin/AdminCreatorDetailPage';
+import { AdminCollaborationPage } from '@/pages/admin/AdminCollaborationPage';
+import { AdminAuditPage } from '@/pages/admin/AdminAuditPage';
 
 export default function App() {
   return (
@@ -23,6 +29,16 @@ export default function App() {
         <Route path="/login" element={<AuthPage mode="login"/>}/>
         <Route path="/register" element={<AuthPage mode="register"/>}/>
         <Route path="/forgot-password" element={<AuthPage mode="forgot"/>}/>
+        <Route path="/admin/login" element={<AuthPage mode="admin"/>}/>
+        <Route element={<AdminGuard/>}>
+          <Route path="/admin" element={<AdminShell/>}>
+            <Route index element={<AdminOverviewPage/>}/>
+            <Route path="creators" element={<AdminCreatorsPage/>}/>
+            <Route path="creators/:uid" element={<AdminCreatorDetailPage/>}/>
+            <Route path="creators/:uid/collaborations/:id" element={<AdminCollaborationPage/>}/>
+            <Route path="audit" element={<AdminAuditPage/>}/>
+          </Route>
+        </Route>
         <Route element={<AuthGuard/>}>
           <Route element={<OnboardingGuard/>}>
             <Route path="/onboarding" element={<OnboardingPage/>}/>

@@ -25,7 +25,8 @@ export function AuthPage({ mode }) {
   const [show, setShow] = useState(false);
   const isRegister = mode === 'register';
   const isForgot = mode === 'forgot';
-  const destination = location.state?.from || '/app';
+  const isAdmin = mode === 'admin';
+  const destination = location.state?.from || (isAdmin ? '/admin' : '/app');
 
   async function submit(event) {
     event.preventDefault();
@@ -59,7 +60,7 @@ export function AuthPage({ mode }) {
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
-      navigate('/app');
+      navigate(destination);
     } catch (error) {
       toast.error(authErrorMessage(error));
     } finally {
@@ -75,8 +76,8 @@ export function AuthPage({ mode }) {
       </header>
       <main className="auth-main">
         <div className="auth-card">
-          <h1>{isForgot ? 'Reset your password' : isRegister ? 'Join the free beta' : 'Welcome back'}</h1>
-          <p>{isForgot ? 'Enter the email linked to your account.' : isRegister ? 'Set up your creator workspace in minutes.' : 'Your collaborations are waiting for you.'}</p>
+          <h1>{isForgot ? 'Reset your password' : isRegister ? 'Join the free beta' : isAdmin ? 'CollabDock Admin' : 'Welcome back'}</h1>
+          <p>{isForgot ? 'Enter the email linked to your account.' : isRegister ? 'Set up your creator workspace in minutes.' : isAdmin ? 'Sign in with an approved administrator account.' : 'Your collaborations are waiting for you.'}</p>
           {!firebaseConfigured && <div className="auth-config-notice"><strong>Authentication setup required</strong><span>Add the Firebase Web App values to <code>frontend/.env</code>, then restart the development server.</span></div>}
           {!isForgot && <><Button variant="outline" className="google-button" onClick={google} loading={loading} disabled={!firebaseConfigured}><GoogleIcon /> Continue with Google</Button><div className="divider"><span>or continue with email</span></div></>}
           <form onSubmit={submit}>
@@ -85,7 +86,7 @@ export function AuthPage({ mode }) {
             {!isForgot && <label className="field"><span>Password <RequiredMark/></span><div className="password-field"><input name="password" type={show ? 'text' : 'password'} autoComplete={isRegister ? 'new-password' : 'current-password'} minLength="6" required placeholder="At least 6 characters"/><button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff size={17}/> : <Eye size={17}/>}</button></div>{!isRegister && <Link className="forgot-link" to="/forgot-password">Forgot password?</Link>}</label>}
             <Button type="submit" className="auth-submit" loading={loading} disabled={!firebaseConfigured}>{isForgot ? 'Send reset link' : isRegister ? 'Join free beta' : 'Log in'}</Button>
           </form>
-          <p className="auth-switch">{isForgot ? <Link to="/login">Back to login</Link> : isRegister ? <>Already have an account? <Link to="/login">Log in</Link></> : <>New to CollabDock? <Link to="/register">Create an account</Link></>}</p>
+          {!isAdmin && <p className="auth-switch">{isForgot ? <Link to="/login">Back to login</Link> : isRegister ? <>Already have an account? <Link to="/login">Log in</Link></> : <>New to CollabDock? <Link to="/register">Create an account</Link></>}</p>}
         </div>
       </main>
     </div>

@@ -41,7 +41,7 @@ export async function getInvoice(req, res) {
 
 export async function deleteInvoice(req, res) {
   if (!mongoose.isValidObjectId(req.params.id)) throw new AppError(400, 'Invalid invoice ID', 'INVALID_ID');
-  const invoice = await Invoice.findOneAndDelete({ _id: req.params.id, ownerUid: req.user.uid });
+  const invoice = await Invoice.findOneAndDelete({ _id: req.params.id, ownerUid: req.user.uid, status: { $ne: 'Void' } });
   if (!invoice) throw new AppError(404, 'Invoice not found', 'NOT_FOUND');
   res.status(204).send();
 }

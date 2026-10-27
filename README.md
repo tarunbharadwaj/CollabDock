@@ -14,6 +14,7 @@ CollabDock is a focused creator-operations workspace for independent Instagram c
 - Real database-backed dashboard metrics and useful empty/loading/error states
 - Responsive light/dark UI with reduced-motion, reduced-transparency, keyboard, and contrast accommodations
 - Owner-scoped MongoDB queries across every financial resource
+- Firebase-claim-protected internal admin workspace with creator operations, account controls, audited corrections, and privacy-safe data projections
 
 ## Repository
 
@@ -67,6 +68,21 @@ The web app runs on `http://localhost:5173`; the API runs on `http://localhost:4
 
 Firebase's client SDK owns browser session persistence. CollabDock never writes ID tokens to `localStorage`; Axios requests a current ID token from the authenticated Firebase user for each request.
 
+### Administrator access
+
+The internal workspace is available at `/admin` and requires a Firebase custom claim named `admin`. The claim is always verified by the backend. A frontend route guard is provided for usability but is not treated as authorization.
+
+Grant or revoke the first administrator from the repository root after configuring the Firebase Admin credentials:
+
+```bash
+node backend/src/scripts/setAdminClaim.js grant admin@example.com
+node backend/src/scripts/setAdminClaim.js revoke admin@example.com
+```
+
+The affected account must sign out and sign in again after its claim changes. Administrator access cannot be granted from the dashboard.
+
+Admin responses exclude bank details, UPI IDs, invoice payment instructions, and payment reference IDs. Mutations require a reason and are written to an immutable audit log.
+
 #### Authentication troubleshooting
 
 If the browser reports `CONFIGURATION_NOT_FOUND` or `auth/configuration-not-found`, the Firebase Web App values may be valid while Firebase Authentication itself has not been initialized. In Firebase Console, select the same project used by `frontend/.env`, open **Authentication**, click **Get started**, and then enable both **Email/Password** and **Google** under **Sign-in method**. Add `localhost` under **Authentication → Settings → Authorized domains** for local development. Projects created after April 28, 2025 do not include `localhost` automatically.
@@ -111,7 +127,7 @@ Backend (`backend/.env`):
 npm run dev       # frontend and backend together
 npm run build     # production frontend and backend syntax checks
 npm run lint      # both ESLint configurations
-npm test          # backend finance and API-contract tests
+npm test          # backend and frontend tests
 npm run seed      # development-only example creator data
 ```
 
@@ -139,6 +155,25 @@ All routes except health require `Authorization: Bearer <Firebase ID token>`. Th
 | GET | `/api/v1/invoices/:id` | Invoice data |
 | GET | `/api/v1/invoices/:id/pdf` | Download private PDF |
 
+Administrator routes require a verified `admin: true` Firebase custom claim.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/v1/admin/me` | Confirm administrator access |
+| GET | `/api/v1/admin/overview` | Platform and financial metrics |
+| GET | `/api/v1/admin/users` | Search and paginate creators |
+| GET/PATCH/DELETE | `/api/v1/admin/users/:uid` | Inspect, update, or permanently remove a creator |
+| POST | `/api/v1/admin/users/:uid/suspend` | Disable creator access and revoke sessions |
+| POST | `/api/v1/admin/users/:uid/reactivate` | Restore creator access |
+| GET | `/api/v1/admin/users/:uid/collaborations` | Creator collaboration records |
+| GET/POST | `/api/v1/admin/users/:uid/payments` | Creator payment records and corrections |
+| GET | `/api/v1/admin/users/:uid/invoices` | Creator invoice records |
+| GET/PATCH/DELETE | `/api/v1/admin/collaborations/:id` | Manage a collaboration |
+| PATCH/DELETE | `/api/v1/admin/deliverables/:id` | Manage a deliverable |
+| PATCH/DELETE | `/api/v1/admin/payments/:id` | Correct or remove a payment |
+| POST | `/api/v1/admin/invoices/:id/void-and-recreate` | Void an invoice and create a numbered replacement |
+| GET | `/api/v1/admin/audit-logs` | Review administrator actions |
+
 ## Deployment
 
 ### Backend on Render
@@ -150,7 +185,7 @@ All routes except health require `Authorization: Bearer <Firebase ID token>`. Th
 
 ### Frontend on Netlify
 
-1. Import the same repository. The root `netlify.toml` builds the frontend workspace, publishes `frontend/dist`, and includes the SPA fallback.
+1. Import the same repository. The root `netlify.toml` builds the frontend workspace, publishes the root `dist` directory, and includes the SPA fallback.
 2. Add every `VITE_*` value from `frontend/.env.example`; set `VITE_API_BASE_URL=https://<render-host>/api/v1`.
 3. Deploy, then add the Netlify hostname to Firebase Authorized domains and to Render's `FRONTEND_URL`.
 

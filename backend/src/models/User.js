@@ -15,6 +15,14 @@ const userSchema = new mongoose.Schema({
   invoicePrefix: { type: String, trim: true, default: 'INV', maxlength: 8 },
   invoiceSequence: { type: Number, default: 0 },
   onboardingCompleted: { type: Boolean, default: false },
+  accountStatus: { type: String, enum: ['Active', 'Suspended', 'Deletion Pending'], default: 'Active', index: true },
+  suspendedAt: { type: Date, default: null },
+  suspendedByUid: { type: String, default: '' },
+  suspensionReason: { type: String, default: '' },
 }, { timestamps: true });
+
+userSchema.index({ displayName: 'text', email: 'text', instagramHandle: 'text' });
+userSchema.index({ accountStatus: 1, createdAt: -1 });
+userSchema.index({ onboardingCompleted: 1, createdAt: -1 });
 
 export const User = mongoose.model('User', userSchema);

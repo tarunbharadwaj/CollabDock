@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { degrees, PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -185,6 +185,17 @@ export async function buildInvoicePdf(invoice) {
 
   const pages = pdf.getPages();
   pages.forEach((pdfPage, index) => {
+    if (invoice.status === 'Void') {
+      pdfPage.drawText('VOID', {
+        x: 170,
+        y: 390,
+        size: 82,
+        font: bold,
+        color: palette.pink,
+        opacity: 0.13,
+        rotate: degrees(32),
+      });
+    }
     pdfPage.drawLine({ start: { x: MARGIN, y: 42 }, end: { x: PAGE_WIDTH - MARGIN, y: 42 }, thickness: 0.55, color: palette.line });
     pdfPage.drawText('Generated with CollabDock. Tax information is provided by the issuer where applicable.', { x: MARGIN, y: 24, size: 7.5, font: regular, color: palette.faint });
     const pageNumber = `${index + 1} / ${pages.length}`;

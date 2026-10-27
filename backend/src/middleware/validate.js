@@ -6,6 +6,7 @@ export const validate = (schema, source = 'body') => (req, _res, next) => {
     const message = result.error.issues.map((issue) => issue.message).join(', ');
     return next(new AppError(400, message, 'VALIDATION_ERROR'));
   }
-  req[source] = result.data;
+  if (source === 'query') req.validatedQuery = result.data;
+  else req[source] = result.data;
   next();
 };
