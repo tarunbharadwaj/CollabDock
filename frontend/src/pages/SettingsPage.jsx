@@ -8,7 +8,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { api, apiMessage } from '@/services/api';
 import { Button, Input, PageHeader, Select, Skeleton, Textarea } from '@/components/ui';
 
-const NICHE_OPTIONS = ['Fashion', 'Beauty', 'Lifestyle', 'Food', 'Travel', 'Technology', 'Fitness', 'Finance'];
+const NICHE_OPTIONS = ['Fashion', 'Beauty', 'Lifestyle', 'Food', 'Travel', 'Technology', 'Fitness', 'Finance', 'Skits'];
 
 function SettingsCard({ icon: Icon, tone, title, description, children, className = '' }) {
   return (
@@ -113,7 +113,7 @@ export function SettingsPage() {
           <div id="invoice-defaults" className="settings-scroll-target">
             <SettingsCard icon={ReceiptText} tone="blue" title="Invoice defaults" description="Saved details used when you create a new invoice.">
               <div className="settings-fields">
-                <div className="settings-field-wide"><Input label="Business or creator name" name="businessName" defaultValue={data.businessName} placeholder="Your creator studio"/></div>
+                <div className="settings-field-wide"><Input label="Business or creator name" name="businessName" defaultValue={data.businessName} placeholder="Your creator studio" required/></div>
                 <div className="settings-field-wide"><Textarea label="Business address" name="businessAddress" rows="3" defaultValue={data.businessAddress} placeholder="Address shown on invoices"/></div>
                 <Input label="UPI ID" name="upiId" defaultValue={data.upiId} placeholder="name@upi"/>
                 <Input label="Invoice prefix" name="invoicePrefix" defaultValue={data.invoicePrefix} maxLength="8" hint="Example: INV"/>

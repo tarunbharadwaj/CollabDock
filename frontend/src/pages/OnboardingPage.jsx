@@ -9,9 +9,13 @@ import { api, apiMessage } from '@/services/api';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Button, Input, Select, Textarea } from '@/components/ui';
 
+const NICHE_OPTIONS = ['Fashion', 'Beauty', 'Lifestyle', 'Food', 'Travel', 'Technology', 'Fitness', 'Finance', 'Skits'];
+
 export function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [values, setValues] = useState({ currency: 'INR' });
+  const [nicheChoice, setNicheChoice] = useState('');
+  const [customNiche, setCustomNiche] = useState('');
   const { user } = useAuth();
   const { data } = useProfile();
   const navigate = useNavigate();
@@ -24,7 +28,20 @@ export function OnboardingPage() {
         displayName: data.displayName || user?.displayName || '',
         instagramHandle: data.instagramHandle || '',
         businessName: data.businessName || '',
+        phone: data.phone || '',
+        businessAddress: data.businessAddress || '',
+        upiId: data.upiId || '',
+        bankDetails: data.bankDetails || '',
       }));
+      if (data.niche) {
+        if (NICHE_OPTIONS.includes(data.niche)) {
+          setNicheChoice(data.niche);
+          setCustomNiche('');
+        } else {
+          setNicheChoice('Other');
+          setCustomNiche(data.niche);
+        }
+      }
     }
   }, [data, user]);
 
@@ -40,6 +57,7 @@ export function OnboardingPage() {
   function collect(event) {
     event.preventDefault();
     const next = { ...values, ...Object.fromEntries(new FormData(event.currentTarget)) };
+    if (step === 2) next.niche = nicheChoice === 'Other' ? customNiche.trim() : nicheChoice;
     setValues(next);
     if (step < 3) setStep(step + 1);
     else save.mutate({ ...next, onboardingCompleted: true });
@@ -67,12 +85,12 @@ export function OnboardingPage() {
       <main>
         <form onSubmit={collect}>
           <div className="onboarding-title"><span>STEP {step} OF 3</span><h2>{step === 1 ? 'Creator details' : step === 2 ? 'Creator profile' : 'Invoice defaults'}</h2><p>{step === 3 && 'Optional - add these now or finish later in Settings.'}</p></div>
-          {step === 1 && <><Input label="Creator / display name" name="displayName" defaultValue={values.displayName} required placeholder="Your name"/><Input label="Instagram handle" name="instagramHandle" defaultValue={values.instagramHandle} placeholder="@yourhandle"/><Input label="Email" value={user?.email || ''} readOnly disabled hint="Managed securely by your sign-in provider"/></>}
-          {step === 2 && <><Input label="Business or creator name" name="businessName" defaultValue={values.businessName} placeholder="Your creator studio"/><Select label="Content niche" name="niche" defaultValue={values.niche || ''}><option value="">Choose a niche (optional)</option><option>Fashion</option><option>Beauty</option><option>Lifestyle</option><option>Food</option><option>Travel</option><option>Technology</option><option>Fitness</option><option>Finance</option><option>Other</option></Select><Select label="Preferred currency" name="currency" defaultValue="INR"><option value="INR">INR - Indian Rupee</option></Select></>}
+          {step === 1 && <><Input label="Creator / display name" name="displayName" defaultValue={values.displayName} required placeholder="Your name"/><Input label="Instagram handle" name="instagramHandle" defaultValue={values.instagramHandle} required placeholder="@yourhandle"/><Input label="Email" value={user?.email || ''} readOnly disabled hint="Managed securely by your sign-in provider"/></>}
+          {step === 2 && <><Input label="Business or creator name" name="businessName" defaultValue={values.businessName} required placeholder="Your creator studio"/><Select label="Content niche" name="niche" value={nicheChoice} onChange={(event) => setNicheChoice(event.target.value)} placeholder="Choose your niche" required>{NICHE_OPTIONS.map((item) => <option key={item}>{item}</option>)}<option>Other</option></Select>{nicheChoice === 'Other' && <Input label="Your niche" value={customNiche} onChange={(event) => setCustomNiche(event.target.value)} required placeholder="For example, parenting or gaming" maxLength="80" autoFocus/>}<Input label="Phone number" name="phone" defaultValue={values.phone} required placeholder="+91 98765 43210"/><Select label="Preferred currency" name="currency" defaultValue="INR"><option value="INR">INR - Indian Rupee</option></Select></>}
           {step === 3 && <><Textarea label="Business address" name="businessAddress" defaultValue={values.businessAddress} rows="3" placeholder="Address shown on invoices"/><Input label="Phone number" name="phone" defaultValue={values.phone} placeholder="+91 98765 43210"/><Input label="UPI ID" name="upiId" defaultValue={values.upiId} placeholder="name@upi"/><Textarea label="Bank details" name="bankDetails" defaultValue={values.bankDetails} rows="3" placeholder="Account name, number and IFSC"/></>}
           <footer>
             {step > 1 ? <Button variant="ghost" onClick={() => setStep(step - 1)}><ArrowLeft size={16}/> Back</Button> : <span/>}
-            <div>{step > 1 && <Button variant="ghost" onClick={finish} loading={save.isPending}>Skip for now</Button>}<Button type="submit" loading={save.isPending}>{step === 3 ? 'Finish setup' : 'Continue'} {step < 3 && <ArrowRight size={16}/>}</Button></div>
+            <div>{step === 3 && <Button variant="ghost" onClick={finish} loading={save.isPending}>Skip invoice details</Button>}<Button type="submit" loading={save.isPending}>{step === 3 ? 'Finish setup' : 'Continue'} {step < 3 && <ArrowRight size={16}/>}</Button></div>
           </footer>
         </form>
       </main>

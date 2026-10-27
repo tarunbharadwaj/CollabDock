@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, updateProfile } from '@firebase/auth';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Check, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth, firebaseConfigured, googleProvider } from '@/lib/firebase';
 import { Button, Input, RequiredMark } from '@/components/ui';
@@ -26,6 +26,7 @@ export function AuthPage({ mode }) {
   const isRegister = mode === 'register';
   const isForgot = mode === 'forgot';
   const destination = location.state?.from || '/app';
+  const authContext = isForgot ? 'Account recovery' : isRegister ? 'Free beta access' : 'Creator workspace';
 
   async function submit(event) {
     event.preventDefault();
@@ -74,9 +75,13 @@ export function AuthPage({ mode }) {
         <Link className="back-link" to="/"><ArrowLeft size={16} /> Back to home</Link>
       </header>
       <main className="auth-main">
-        <div className="auth-card">
-          <h1>{isForgot ? 'Reset your password' : isRegister ? 'Join the free beta' : 'Welcome back'}</h1>
-          <p>{isForgot ? 'Enter the email linked to your account.' : isRegister ? 'Set up your creator workspace in minutes.' : 'Your collaborations are waiting for you.'}</p>
+        <section className={`auth-card ${isRegister ? 'auth-card-register' : ''}`}>
+          <div className="auth-card-heading">
+            <span className="auth-kicker"><Sparkles size={13} /> {authContext}</span>
+            <h1>{isForgot ? 'Reset your password' : isRegister ? 'Join the free beta' : 'Welcome back'}</h1>
+            <p>{isForgot ? 'Enter the email linked to your account.' : isRegister ? 'Set up your creator workspace in minutes.' : 'Your collaborations are waiting for you.'}</p>
+            {isRegister && <div className="auth-beta-notes"><span><Check size={13} /> Free during beta</span><span><Check size={13} /> No card required</span></div>}
+          </div>
           {!firebaseConfigured && <div className="auth-config-notice"><strong>Authentication setup required</strong><span>Add the Firebase Web App values to <code>frontend/.env</code>, then restart the development server.</span></div>}
           {!isForgot && <><Button variant="outline" className="google-button" onClick={google} loading={loading} disabled={!firebaseConfigured}><GoogleIcon /> Continue with Google</Button><div className="divider"><span>or continue with email</span></div></>}
           <form onSubmit={submit}>
@@ -86,7 +91,7 @@ export function AuthPage({ mode }) {
             <Button type="submit" className="auth-submit" loading={loading} disabled={!firebaseConfigured}>{isForgot ? 'Send reset link' : isRegister ? 'Join free beta' : 'Log in'}</Button>
           </form>
           <p className="auth-switch">{isForgot ? <Link to="/login">Back to login</Link> : isRegister ? <>Already have an account? <Link to="/login">Log in</Link></> : <>New to CollabDock? <Link to="/register">Create an account</Link></>}</p>
-        </div>
+        </section>
       </main>
     </div>
   );

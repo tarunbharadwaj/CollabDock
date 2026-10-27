@@ -14,7 +14,29 @@ export const profileSchema = z.object({
   upiId: optionalText(100), bankDetails: optionalText(500),
   invoicePrefix: z.string().trim().min(2).max(8).regex(/^[A-Za-z0-9-]+$/).optional(),
   onboardingCompleted: z.boolean().optional(),
-}).partial().refine((value) => Object.keys(value).length > 0, 'Provide at least one field');
+}).partial()
+  .refine((value) => Object.keys(value).length > 0, 'Provide at least one field')
+  .superRefine((value, context) => {
+    if (value.onboardingCompleted !== true) return;
+
+    const requiredProfileFields = [
+      ['displayName', 'Display name'],
+      ['instagramHandle', 'Instagram handle'],
+      ['niche', 'Content niche'],
+      ['phone', 'Phone number'],
+      ['businessName', 'Business or creator name'],
+    ];
+
+    requiredProfileFields.forEach(([field, label]) => {
+      if (typeof value[field] !== 'string' || value[field].trim().length < 2) {
+        context.addIssue({
+          code: 'custom',
+          path: [field],
+          message: `${label} is required to finish setup`,
+        });
+      }
+    });
+  });
 
 export const collaborationSchema = z.object({
   brandName: z.string().trim().min(2).max(120),
