@@ -1026,6 +1026,7 @@ h1,h2,h3,h4,p { margin-top: 0; }
 .sidebar{background:var(--sidebar-bg)}
 .sidebar>.brand,.sidebar-collapsed .sidebar>.brand{background:var(--surface)}
 .mobile-nav{background:var(--floating-bg)}
+@media(max-width:800px){.mobile-nav a{min-width:0;padding-inline:2px}.mobile-nav a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 .violet,.stat-icon.violet,.metric-row-icon.violet{background:var(--violet-soft);color:var(--primary)}
 .blue,.stat-icon.blue,.metric-row-icon.blue{background:var(--blue-soft);color:var(--blue)}
 .green,.stat-icon.green,.metric-row-icon.green{background:var(--green-soft);color:var(--success)}

@@ -21,11 +21,11 @@ import { BrandLogo } from './BrandLogo';
 const sidebarPreferenceKey = 'collabdock-sidebar-collapsed';
 
 const nav = [
-  { to: '/app', label: 'Overview', icon: BarChart3, end: true },
-  { to: '/app/collaborations', label: 'Collaborations', icon: BriefcaseBusiness },
+  { to: '/app', label: 'Overview', mobileLabel: 'Overview', icon: BarChart3, end: true },
+  { to: '/app/collaborations', label: 'Collaborations', mobileLabel: 'Deals', icon: BriefcaseBusiness },
   { to: '/app/payments', label: 'Payments', icon: IndianRupee },
   { to: '/app/invoices', label: 'Invoices', icon: FileText },
-  { to: '/app/paid-deals', label: 'Paid Deals', icon: BadgeCheck },
+  { to: '/app/paid-deals', label: 'Paid Deals', mobileLabel: 'Paid', icon: BadgeCheck },
   { to: '/app/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -101,9 +101,9 @@ export function AppShell() {
       </aside>
 
       <main className="main-content"><Outlet/></main>
-      <nav className="mobile-nav">
-        {nav.slice(0, 5).map(({ to, label, icon: Icon, end }) => (
-          <NavLink key={to} to={to} end={end}><Icon size={20}/><span>{label}</span></NavLink>
+      <nav className="mobile-nav" aria-label="Mobile navigation">
+        {nav.map(({ to, label, mobileLabel, icon: Icon, end }) => (
+          <NavLink key={to} to={to} end={end} aria-label={label}><Icon size={19}/><span>{mobileLabel || label}</span></NavLink>
         ))}
       </nav>
       {!location.pathname.endsWith('/new') && (
