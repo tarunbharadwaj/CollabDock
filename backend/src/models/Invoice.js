@@ -27,8 +27,15 @@ const invoiceSchema = new mongoose.Schema({
   paymentInstructions: { type: String, default: '' },
   notes: { type: String, default: '' },
   currency: { type: String, enum: ['INR'], default: 'INR' },
+  status: { type: String, enum: ['Issued', 'Void'], default: 'Issued', index: true },
+  voidedAt: { type: Date, default: null },
+  voidedByUid: { type: String, default: '' },
+  voidReason: { type: String, default: '' },
+  replacesInvoice: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice', default: null },
+  replacedByInvoice: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice', default: null },
 }, { timestamps: true });
 
 invoiceSchema.index({ ownerUid: 1, invoiceNumber: 1 }, { unique: true });
 invoiceSchema.index({ ownerUid: 1, createdAt: -1 });
+invoiceSchema.index({ ownerUid: 1, status: 1, createdAt: -1 });
 export const Invoice = mongoose.model('Invoice', invoiceSchema);

@@ -17,6 +17,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { Button } from './ui';
 import { BrandLogo } from './BrandLogo';
+import { ProductExperienceProvider } from '@/context/ProductExperienceContext';
 
 const sidebarPreferenceKey = 'collabdock-sidebar-collapsed';
 
@@ -45,6 +46,7 @@ export function AppShell() {
   const toggleSidebar = () => setSidebarCollapsed((collapsed) => !collapsed);
 
   return (
+    <ProductExperienceProvider>
     <div className={`app-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <aside className="sidebar" id="app-sidebar">
         <NavLink className="brand" to="/app" aria-label="CollabDock overview">
@@ -65,6 +67,7 @@ export function AppShell() {
         <Button
           className="sidebar-add"
           onClick={() => navigate('/app/collaborations/new')}
+          data-tour="add-collaboration"
           aria-label="Add collaboration"
           title={sidebarCollapsed ? 'Add collaboration' : undefined}
         >
@@ -107,10 +110,11 @@ export function AppShell() {
         ))}
       </nav>
       {!location.pathname.endsWith('/new') && (
-        <button className="mobile-fab" aria-label="Add collaboration" onClick={() => navigate('/app/collaborations/new')}>
+        <button className="mobile-fab" data-tour="add-collaboration" aria-label="Add collaboration" onClick={() => navigate('/app/collaborations/new')}>
           <Plus size={22}/>
         </button>
       )}
     </div>
+    </ProductExperienceProvider>
   );
 }

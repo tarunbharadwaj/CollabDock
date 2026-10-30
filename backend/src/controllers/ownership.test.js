@@ -29,7 +29,7 @@ describe('ownership boundaries', () => {
 
     await deleteInvoice({ params: { id: resourceId }, user: { uid: 'verified-owner' } }, response);
 
-    expect(Invoice.findOneAndDelete).toHaveBeenCalledWith({ _id: resourceId, ownerUid: 'verified-owner' });
+    expect(Invoice.findOneAndDelete).toHaveBeenCalledWith({ _id: resourceId, ownerUid: 'verified-owner', status: { $ne: 'Void' } });
     expect(response.status).toHaveBeenCalledWith(204);
   });
 

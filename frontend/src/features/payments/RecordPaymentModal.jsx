@@ -5,9 +5,11 @@ import { toast } from 'sonner';
 import { api, apiMessage } from '@/services/api';
 import { inr, toPaisa } from '@/lib/format';
 import { Button, Input, Modal, MoneyInput, Select, Textarea } from '@/components/ui';
+import { useProductExperience } from '@/context/ProductExperienceContext';
 
 export function RecordPaymentModal({ collaboration, open, onClose }) {
   const queryClient = useQueryClient();
+  const { signalMilestone } = useProductExperience();
   const [amount, setAmount] = useState('');
   const amountPaisa = toPaisa(amount);
   const isFullAmount = amount !== '' && amountPaisa === collaboration.outstandingPaisa;
@@ -27,6 +29,7 @@ export function RecordPaymentModal({ collaboration, open, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['collaborations'] });
       setAmount('');
       onClose();
+      signalMilestone('Payment Recorded');
     },
     onError: (error) => toast.error(apiMessage(error)),
   });

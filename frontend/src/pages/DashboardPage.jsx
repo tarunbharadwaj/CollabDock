@@ -110,7 +110,7 @@ export function DashboardPage() {
         action={<Link className="button button-primary button-md" to="/app/collaborations/new"><Plus size={17}/> Add collaboration</Link>}
       />
 
-      <section className="dashboard-kpi-grid" aria-label="Business overview">
+      <section className="dashboard-kpi-grid" data-tour="overview-summary" aria-label="Business overview">
         {primaryStats.map(({ label, value, helper, icon: Icon, tone, to }) => (
           <Link className={`dashboard-kpi-card ${tone}`} to={to} key={label}>
             <header><span>{label}</span><i><Icon size={18}/></i></header>

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.js';
+import { requireActiveAccount, requireAdmin, requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { asyncHandler } from '../utils/errors.js';
 import { profileSchema, collaborationSchema, collaborationUpdateSchema, deliverableSchema, deliverableUpdateSchema, paymentSchema, invoiceSchema } from '../validators/schemas.js';
@@ -9,12 +9,20 @@ import { listCollaborations, createCollaboration, getCollaboration, updateCollab
 import { addDeliverable, updateDeliverable, deleteDeliverable } from '../controllers/deliverableController.js';
 import { listPayments, createPayment, deletePayment, paymentHistory } from '../controllers/paymentController.js';
 import { listInvoices, createInvoice, getInvoice, deleteInvoice, downloadInvoice } from '../controllers/invoiceController.js';
+import { adminRouter } from './admin.js';
+import { acknowledgeProductTour, createFeedback, recordFeedbackPrompt } from '../controllers/experienceController.js';
+import { feedbackSchema, productTourSchema } from '../validators/feedbackSchemas.js';
 
 export const apiRouter = Router();
 apiRouter.get('/health', (_req, res) => res.json({ status: 'ok', service: 'collabdock-api' }));
 apiRouter.use(requireAuth);
+apiRouter.use('/admin', requireAdmin, adminRouter);
+apiRouter.use(requireActiveAccount);
 apiRouter.get('/me', asyncHandler(getMe));
 apiRouter.patch('/me', validate(profileSchema), asyncHandler(updateMe));
+apiRouter.post('/me/product-tour', validate(productTourSchema), asyncHandler(acknowledgeProductTour));
+apiRouter.post('/me/feedback-prompt', asyncHandler(recordFeedbackPrompt));
+apiRouter.post('/feedback', validate(feedbackSchema), asyncHandler(createFeedback));
 apiRouter.get('/dashboard', asyncHandler(getDashboard));
 apiRouter.route('/collaborations').get(asyncHandler(listCollaborations)).post(validate(collaborationSchema), asyncHandler(createCollaboration));
 apiRouter.route('/collaborations/:id').get(asyncHandler(getCollaboration)).patch(validate(collaborationUpdateSchema), asyncHandler(updateCollaboration)).delete(asyncHandler(deleteCollaboration));

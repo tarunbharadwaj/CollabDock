@@ -45,8 +45,9 @@ export function InvoicesPage() {
     ? data.filter((invoice) => [invoice.invoiceNumber, invoice.billTo?.name, invoice.billTo?.email]
       .some((value) => value?.toLowerCase().includes(deferredSearch)))
     : data;
-  const totalInvoicedPaisa = data.reduce((total, invoice) => total + invoice.totalPaisa, 0);
-  const latestInvoice = data.reduce((latest, invoice) => {
+  const issuedInvoices = data.filter((invoice) => invoice.status !== 'Void');
+  const totalInvoicedPaisa = issuedInvoices.reduce((total, invoice) => total + invoice.totalPaisa, 0);
+  const latestInvoice = issuedInvoices.reduce((latest, invoice) => {
     if (!latest) return invoice;
     return new Date(invoice.invoiceDate) > new Date(latest.invoiceDate) ? invoice : latest;
   }, null);
@@ -66,6 +67,7 @@ export function InvoicesPage() {
   return (
     <div className="page invoices-page">
       <PageHeader
+        data-tour="invoice-workspace"
         eyebrow="DOCUMENTS"
         title="Invoices"
         description="Create, manage, and download invoices for your brand collaborations."
@@ -80,7 +82,7 @@ export function InvoicesPage() {
           </article>
           <article className="invoice-overview-stat">
             <span className="invoice-overview-icon violet"><ReceiptText size={19}/></span>
-            <div><small>DOCUMENTS</small><strong>{data.length}</strong><p>{data.length === 1 ? 'Invoice created' : 'Invoices created'}</p></div>
+            <div><small>ISSUED DOCUMENTS</small><strong>{issuedInvoices.length}</strong><p>{data.length - issuedInvoices.length} void</p></div>
           </article>
           <article className="invoice-overview-stat">
             <span className="invoice-overview-icon blue"><CalendarDays size={19}/></span>
@@ -113,14 +115,14 @@ export function InvoicesPage() {
                 <article key={invoice._id}>
                   <div className="invoice-document-cell">
                     <span className="invoice-document-icon"><FileText size={19}/><small>PDF</small></span>
-                    <span><strong>{invoice.invoiceNumber}</strong><small>For {invoice.billTo.name}</small><em>{invoice.billTo.email}</em></span>
+                    <span><strong>{invoice.invoiceNumber}{invoice.status === 'Void' && <b className="invoice-void-mark">VOID</b>}</strong><small>For {invoice.billTo.name}</small><em>{invoice.billTo.email}</em></span>
                   </div>
                   <span className="invoice-date-cell"><small>Issued</small><strong>{shortDate(invoice.invoiceDate)}</strong></span>
                   <span className="invoice-date-cell"><small>Due</small><strong>{shortDate(invoice.dueDate)}</strong></span>
                   <span className="invoice-amount-cell"><small>Amount</small><strong>{inr(invoice.totalPaisa, 2)}</strong></span>
                   <div className="invoice-row-actions">
                     <Button variant="secondary" size="sm" loading={downloadingId === invoice._id} onClick={() => downloadInvoice(invoice)}><Download size={15}/> Download</Button>
-                    <Button className="invoice-delete-button" variant="ghost" size="icon" onClick={() => setInvoiceToDelete(invoice)} aria-label={`Delete ${invoice.invoiceNumber}`} title="Delete invoice"><Trash2 size={17}/></Button>
+                    {invoice.status !== 'Void' && <Button className="invoice-delete-button" variant="ghost" size="icon" onClick={() => setInvoiceToDelete(invoice)} aria-label={`Delete ${invoice.invoiceNumber}`} title="Delete invoice"><Trash2 size={17}/></Button>}
                   </div>
                 </article>
               ))}

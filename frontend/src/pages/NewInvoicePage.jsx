@@ -9,11 +9,13 @@ import { api, apiMessage } from '@/services/api';
 import { useProfile } from '@/hooks/useProfile';
 import { inr, toPaisa } from '@/lib/format';
 import { Button, Input, MoneyInput, RequiredMark, Select, Textarea } from '@/components/ui';
+import { useProductExperience } from '@/context/ProductExperienceContext';
 
 export function NewInvoicePage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { signalMilestone } = useProductExperience();
   const { data: profile } = useProfile();
   const { data: collaborations = [], isLoading: collaborationsLoading } = useQuery({
     queryKey: ['collaborations', 'invoice-picker', 'active'],
@@ -91,6 +93,7 @@ export function NewInvoicePage() {
     onSuccess: () => {
       toast.success('Invoice created');
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      signalMilestone('Invoice Created');
       navigate('/app/invoices');
     },
     onError: (error) => toast.error(apiMessage(error)),

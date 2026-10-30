@@ -383,4 +383,4 @@ export function Modal({ open, onClose, title, description, children, size = '' }
 }
 export function Skeleton({ className = '' }) { return <div className={`skeleton ${className}`} />; }
 export function EmptyState({ icon: Icon, title, description, action }) { return <div className="empty-state">{Icon && <span className="empty-icon"><Icon size={24} /></span>}<h3>{title}</h3><p>{description}</p>{action}</div>; }
-export function PageHeader({ eyebrow, title, description, action }) { return <header className="page-header"><div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>; }
+export function PageHeader({ eyebrow, title, description, action, ...props }) { return <header className="page-header" {...props}><div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action}</header>; }

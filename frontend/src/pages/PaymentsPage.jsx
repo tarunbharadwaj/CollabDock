@@ -88,7 +88,7 @@ export function PaymentsPage() {
     return (
       <div className="page payments-page">
         <PageHeader title="Payments" />
-        <div className="payment-overview">
+        <div className="payment-overview" data-tour="payments-overview">
           {[1, 2, 3].map((item) => <Skeleton key={item} className="payment-overview-skeleton" />)}
         </div>
         <Skeleton className="panel-skeleton" />
@@ -105,7 +105,7 @@ export function PaymentsPage() {
         action={<Link className="button button-outline button-md" to="/app/paid-deals"><BadgeCheck size={16}/> Paid deals</Link>}
       />
 
-      <section className="payment-overview" aria-label="Payment overview">
+      <section className="payment-overview" data-tour="payments-overview" aria-label="Payment overview">
         <article className="payment-outstanding-card">
           <span className="payment-overview-icon"><WalletCards size={19}/></span>
           <div><small>TOTAL OUTSTANDING</small><strong>{inr(data.summary.outstandingPaisa)}</strong><p>Still expected from active brand deals</p></div>
