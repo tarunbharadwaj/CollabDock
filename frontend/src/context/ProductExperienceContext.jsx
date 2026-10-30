@@ -112,12 +112,14 @@ function TourLayer({ stepIndex, onBack, onNext, onSkip }) {
     }
 
     let frame;
+    let targetTimer;
     const measure = () => {
       const target = visibleTarget(step.target);
       if (!target) {
         setTargetRect(null);
         return;
       }
+      window.clearInterval(targetTimer);
       const rect = target.getBoundingClientRect();
       if (rect.top < 12 || rect.bottom > window.innerHeight - 12) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -127,7 +129,8 @@ function TourLayer({ stepIndex, onBack, onNext, onSkip }) {
         setTargetRect({ left: next.left - 7, top: next.top - 7, width: next.width + 14, height: next.height + 14 });
       });
     };
-    const timer = window.setTimeout(measure, 180);
+    const timer = window.setTimeout(measure, 120);
+    targetTimer = window.setInterval(measure, 350);
     const handleViewport = () => {
       setMobile(window.innerWidth < 700);
       measure();
@@ -136,6 +139,7 @@ function TourLayer({ stepIndex, onBack, onNext, onSkip }) {
     window.addEventListener('scroll', handleViewport, true);
     return () => {
       window.clearTimeout(timer);
+      window.clearInterval(targetTimer);
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', handleViewport);
       window.removeEventListener('scroll', handleViewport, true);
@@ -210,7 +214,6 @@ function TourLayer({ stepIndex, onBack, onNext, onSkip }) {
         </div>
         <h2 id={titleId}>{step.title}</h2>
         <p>{step.description}</p>
-        {!targetRect && <small className="product-tour-target-note">This area is not available yet. You can continue the tour.</small>}
         <footer>
           <Button variant="ghost" onClick={onBack} disabled={stepIndex === 0}><ArrowLeft size={15}/> Back</Button>
           <Button onClick={onNext}>{isLast ? <><Check size={16}/> Finish</> : <>Next <ArrowRight size={15}/></>}</Button>

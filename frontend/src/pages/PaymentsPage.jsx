@@ -54,7 +54,7 @@ export function PaymentsPage() {
     return (
       <div className="page payments-page">
         <PageHeader title="Payments" />
-        <div className="payment-overview">
+        <div className="payment-overview" data-tour="payments-overview">
           {[1, 2, 3].map((item) => <Skeleton key={item} className="payment-overview-skeleton" />)}
         </div>
         <Skeleton className="panel-skeleton" />

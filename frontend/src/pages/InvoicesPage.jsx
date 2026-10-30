@@ -67,6 +67,7 @@ export function InvoicesPage() {
   return (
     <div className="page invoices-page">
       <PageHeader
+        data-tour="invoice-workspace"
         eyebrow="DOCUMENTS"
         title="Invoices"
         description="Create, manage, and download invoices for your brand collaborations."
@@ -91,7 +92,7 @@ export function InvoicesPage() {
       )}
 
       {isLoading ? <Skeleton className="panel-skeleton"/> : (
-        <section className="invoice-library" data-tour="invoice-workspace">
+        <section className="invoice-library">
           <header className="invoice-library-header">
             <div><h2>Invoice library</h2><p>Your downloadable invoice history.</p></div>
             <span>{visibleInvoices.length} {visibleInvoices.length === 1 ? 'invoice' : 'invoices'}</span>
