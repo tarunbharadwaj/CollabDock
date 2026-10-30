@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AtSign, Building2, Check, LogOut, Moon, Palette, ReceiptText, Save, Sun, UserRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AtSign, Building2, Check, LogOut, Mail, Moon, Palette, ReceiptText, Save, Sun, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -149,6 +150,11 @@ export function SettingsPage() {
           <section className="settings-account-card">
             <div><span className="settings-account-icon"><LogOut size={18}/></span><span><strong>Account access</strong><small>Sign out of CollabDock on this browser.</small></span></div>
             <Button variant="secondary" onClick={logout}><LogOut size={16}/> Log out</Button>
+          </section>
+
+          <section className="settings-contact-card">
+            <div><span className="settings-account-icon"><Mail size={18}/></span><span><strong>Need help?</strong><small>Contact the CollabDock admin for account or product support.</small></span></div>
+            <Link className="button button-secondary button-md" to="/contact" state={{ from: '/app/settings' }}><Mail size={16}/> Contact admin</Link>
           </section>
         </aside>
       </form>
