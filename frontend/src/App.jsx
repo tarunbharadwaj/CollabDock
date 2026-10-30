@@ -21,6 +21,7 @@ import { AdminCreatorDetailPage } from '@/pages/admin/AdminCreatorDetailPage';
 import { AdminCollaborationPage } from '@/pages/admin/AdminCollaborationPage';
 import { AdminAuditPage } from '@/pages/admin/AdminAuditPage';
 import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage';
+import { ContactPage } from '@/pages/ContactPage';
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="feedback" element={<AdminFeedbackPage/>}/>
           </Route>
         </Route>
+        <Route path="/contact" element={<ContactPage/>}/>
         <Route element={<AuthGuard/>}>
           <Route element={<OnboardingGuard/>}>
             <Route path="/onboarding" element={<OnboardingPage/>}/>

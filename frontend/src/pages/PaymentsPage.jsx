@@ -1,8 +1,11 @@
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   BadgeCheck,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Check,
   Clock3,
   IndianRupee,
@@ -13,10 +16,11 @@ import {
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { inr, shortDate } from '@/lib/format';
-import { Button, EmptyState, PageHeader, Skeleton } from '@/components/ui';
+import { Button, EmptyState, PageHeader, Select, Skeleton } from '@/components/ui';
 import { PaymentBadge } from '@/components/Badges';
 import { RecordPaymentModal } from '@/features/payments/RecordPaymentModal';
 import { PaymentReminderModal } from '@/features/payments/PaymentReminderModal';
+import { PAYMENT_SORT_DEFAULT_DIRECTIONS, sortPaymentRows } from '@/features/payments/sortPayments';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -24,6 +28,21 @@ const FILTERS = [
   { value: 'overdue', label: 'Overdue' },
   { value: 'paid', label: 'Paid' },
 ];
+
+function SortableHeader({ column, label, sort, onSort, className = '' }) {
+  const active = sort.key === column;
+  const ariaSort = active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none';
+  return (
+    <span role="columnheader" aria-sort={ariaSort} className={className}>
+      <button type="button" className={active ? 'active' : ''} onClick={() => onSort(column)}>
+        {label}
+        {active
+          ? sort.direction === 'asc' ? <ArrowUp size={13}/> : <ArrowDown size={13}/>
+          : <ArrowUpDown size={13}/>}
+      </button>
+    </span>
+  );
+}
 
 export function PaymentsPage() {
   const { data, isLoading } = useQuery({
@@ -34,9 +53,10 @@ export function PaymentsPage() {
   const [reminding, setReminding] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState({ key: '', direction: 'asc' });
   const deferredSearch = useDeferredValue(search.trim().toLowerCase());
   const rows = data?.data || [];
-  const visibleRows = rows.filter((item) => {
+  const filteredRows = rows.filter((item) => {
     const matchesSearch = !deferredSearch || [item.brandName, item.campaignTitle, item.platform]
       .some((value) => value?.toLowerCase().includes(deferredSearch));
     const matchesFilter = filter === 'all'
@@ -45,9 +65,23 @@ export function PaymentsPage() {
       || (filter === 'paid' && item.paymentStatus === 'Paid');
     return matchesSearch && matchesFilter;
   });
+  const visibleRows = useMemo(() => sortPaymentRows(filteredRows, sort), [filteredRows, sort]);
+
+  function toggleSort(key) {
+    setSort((current) => current.key === key
+      ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
+      : { key, direction: PAYMENT_SORT_DEFAULT_DIRECTIONS[key] });
+  }
+
+  function selectMobileSort(event) {
+    const [key = '', direction = 'asc'] = event.target.value.split(':');
+    setSort({ key, direction });
+  }
+
   function resetFilters() {
     setSearch('');
     setFilter('all');
+    setSort({ key: '', direction: 'asc' });
   }
 
   if (isLoading) {
@@ -105,6 +139,21 @@ export function PaymentsPage() {
                 <button key={option.value} type="button" className={filter === option.value ? 'active' : ''} aria-pressed={filter === option.value} onClick={() => setFilter(option.value)}>{option.label}</button>
               ))}
             </div>
+            <div className="payment-mobile-sort">
+              <Select aria-label="Sort payments" value={sort.key ? `${sort.key}:${sort.direction}` : ''} onChange={selectMobileSort}>
+                <option value="">Default order</option>
+                <option value="brand:asc">Brand: A to Z</option>
+                <option value="brand:desc">Brand: Z to A</option>
+                <option value="progress:desc">Progress: highest first</option>
+                <option value="progress:asc">Progress: lowest first</option>
+                <option value="outstanding:desc">Outstanding: highest first</option>
+                <option value="outstanding:asc">Outstanding: lowest first</option>
+                <option value="dueDate:asc">Due date: earliest first</option>
+                <option value="dueDate:desc">Due date: latest first</option>
+                <option value="status:asc">Status: A to Z</option>
+                <option value="status:desc">Status: Z to A</option>
+              </Select>
+            </div>
           </div>
         )}
 
@@ -112,11 +161,11 @@ export function PaymentsPage() {
           <>
             <div className="payment-modern-table" role="table" aria-label="Collaboration payments">
               <div className="payment-modern-head" role="row">
-                <span role="columnheader">Brand and collaboration</span>
-                <span role="columnheader">Payment progress</span>
-                <span role="columnheader">Outstanding</span>
-                <span role="columnheader">Due date</span>
-                <span role="columnheader">Status</span>
+                <SortableHeader column="brand" label="Brand and collaboration" sort={sort} onSort={toggleSort}/>
+                <SortableHeader column="progress" label="Payment progress" sort={sort} onSort={toggleSort}/>
+                <SortableHeader column="outstanding" label="Outstanding" sort={sort} onSort={toggleSort}/>
+                <SortableHeader column="dueDate" label="Due date" sort={sort} onSort={toggleSort}/>
+                <SortableHeader column="status" label="Status" sort={sort} onSort={toggleSort}/>
                 <span role="columnheader" className="sr-only">Actions</span>
               </div>
               {visibleRows.map((item) => {

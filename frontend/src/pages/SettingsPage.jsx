@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AtSign, Building2, Check, LogOut, MessageSquareHeart, Moon, Palette, ReceiptText, RotateCcw, Save, Sun, UserRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AtSign, Building2, Check, LogOut, Mail, MessageSquareHeart, Moon, Palette, ReceiptText, RotateCcw, Save, Sun, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -158,6 +159,11 @@ export function SettingsPage() {
             <div><strong>Help shape CollabDock</strong><p>Share feedback or take another look around the workspace.</p></div>
             <Button variant="secondary" onClick={() => openFeedback('Manual')}><MessageSquareHeart size={16}/> Share feedback</Button>
             <Button variant="ghost" onClick={() => startTour({ replay: true })}><RotateCcw size={16}/> Replay product tour</Button>
+          </section>
+
+          <section className="settings-contact-card">
+            <div><span className="settings-account-icon"><Mail size={18}/></span><span><strong>Need help?</strong><small>Contact the CollabDock admin for account or product support.</small></span></div>
+            <Link className="button button-secondary button-md" to="/contact" state={{ from: '/app/settings' }}><Mail size={16}/> Contact admin</Link>
           </section>
         </aside>
       </form>

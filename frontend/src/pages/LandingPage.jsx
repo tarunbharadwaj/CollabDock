@@ -84,7 +84,7 @@ export function LandingPage() {
             <span>Explore</span>
             <a href="#workflow">How it works</a>
             <a href="#features">Features</a>
-            <a href="mailto:hello@collabdock.app">Contact</a>
+            <Link to="/contact">Contact</Link>
           </nav>
           <div className="landing-footer-action">
             <span>Ready when you are</span>
