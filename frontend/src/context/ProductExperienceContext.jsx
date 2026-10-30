@@ -12,6 +12,31 @@ const ProductExperienceContext = createContext(null);
 const TOUR_VERSION = 1;
 const FEEDBACK_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
 
+function tourStorageKey(uid) {
+  return uid ? `collabdock-product-tour-${uid}-v${TOUR_VERSION}` : '';
+}
+
+function readStoredTourStatus(uid) {
+  const key = tourStorageKey(uid);
+  if (!key) return '';
+  try {
+    const value = localStorage.getItem(key);
+    return ['Completed', 'Skipped'].includes(value) ? value : '';
+  } catch {
+    return '';
+  }
+}
+
+function storeTourStatus(uid, status) {
+  const key = tourStorageKey(uid);
+  if (!key) return;
+  try {
+    localStorage.setItem(key, status);
+  } catch {
+    // Server persistence remains the source of truth when browser storage is unavailable.
+  }
+}
+
 const TOUR_STEPS = [
   {
     route: '/app',
@@ -262,8 +287,10 @@ export function ProductExperienceProvider({ children }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackContext, setFeedbackContext] = useState('Manual');
+  const [localTourStatus, setLocalTourStatus] = useState(() => readStoredTourStatus(profile?.uid));
   const feedbackPendingRef = useRef(false);
   const tourAcknowledgedRef = useRef(false);
+  const tourSyncAttemptedRef = useRef(false);
   const promptTimerRef = useRef(null);
 
   const mergeProfile = useCallback((updates) => {
@@ -273,15 +300,35 @@ export function ProductExperienceProvider({ children }) {
   const tourMutation = useMutation({
     mutationFn: (status) => api.post('/me/product-tour', { status, version: TOUR_VERSION }),
     onSuccess: ({ data }) => mergeProfile(data.data),
-    onError: (error) => toast.error(apiMessage(error)),
   });
+
+  const rememberTourStatus = useCallback((status) => {
+    tourAcknowledgedRef.current = true;
+    storeTourStatus(profile?.uid, status);
+    setLocalTourStatus(status);
+    mergeProfile({
+      productTourStatus: status,
+      productTourVersion: TOUR_VERSION,
+      productTourAcknowledgedAt: new Date().toISOString(),
+    });
+    tourMutation.mutate(status);
+  }, [mergeProfile, profile?.uid, tourMutation]);
+
+  useEffect(() => {
+    if (!profile?.uid) return;
+    const storedStatus = readStoredTourStatus(profile.uid);
+    setLocalTourStatus(storedStatus);
+    if (!storedStatus || (profile.productTourStatus || 'Not Seen') !== 'Not Seen' || tourSyncAttemptedRef.current) return;
+    tourSyncAttemptedRef.current = true;
+    tourMutation.mutate(storedStatus);
+  }, [profile?.productTourStatus, profile?.uid, tourMutation]);
 
   useEffect(() => {
     if (!profile?.onboardingCompleted || location.pathname !== '/app' || tourOpen || inviteOpen || tourAcknowledgedRef.current) return undefined;
-    if ((profile.productTourStatus || 'Not Seen') !== 'Not Seen') return undefined;
+    if (localTourStatus || (profile.productTourStatus || 'Not Seen') !== 'Not Seen') return undefined;
     const timer = window.setTimeout(() => setInviteOpen(true), 700);
     return () => window.clearTimeout(timer);
-  }, [inviteOpen, location.pathname, profile?.onboardingCompleted, profile?.productTourStatus, tourOpen]);
+  }, [inviteOpen, localTourStatus, location.pathname, profile?.onboardingCompleted, profile?.productTourStatus, tourOpen]);
 
   useEffect(() => () => window.clearTimeout(promptTimerRef.current), []);
 
@@ -299,14 +346,13 @@ export function ProductExperienceProvider({ children }) {
     setTourOpen(false);
     setStepIndex(0);
     navigate('/app');
-    if (!tourReplay) tourMutation.mutate(status);
-  }, [navigate, tourMutation, tourReplay]);
+    if (!tourReplay) rememberTourStatus(status);
+  }, [navigate, rememberTourStatus, tourReplay]);
 
   const skipInvitation = useCallback(() => {
-    tourAcknowledgedRef.current = true;
     setInviteOpen(false);
-    tourMutation.mutate('Skipped');
-  }, [tourMutation]);
+    rememberTourStatus('Skipped');
+  }, [rememberTourStatus]);
 
   const nextTourStep = useCallback(() => {
     if (stepIndex >= TOUR_STEPS.length - 1) closeTour('Completed');

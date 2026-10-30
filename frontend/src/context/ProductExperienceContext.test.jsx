@@ -19,7 +19,8 @@ function renderProvider() {
 describe('ProductExperienceProvider', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    useProfileMock.mockReturnValue({ data: { onboardingCompleted: true, productTourStatus: 'Not Seen' } });
+    localStorage.clear();
+    useProfileMock.mockReturnValue({ data: { uid: 'creator-uid', onboardingCompleted: true, productTourStatus: 'Not Seen' } });
     postMock.mockResolvedValue({ data: { data: { productTourStatus: 'Skipped', productTourVersion: 1 } } });
   });
 
@@ -41,10 +42,22 @@ describe('ProductExperienceProvider', () => {
   });
 
   it('does not offer the tour after it has been acknowledged', async () => {
-    useProfileMock.mockReturnValue({ data: { onboardingCompleted: true, productTourStatus: 'Completed' } });
+    useProfileMock.mockReturnValue({ data: { uid: 'creator-uid', onboardingCompleted: true, productTourStatus: 'Completed' } });
     renderProvider();
     await act(async () => { vi.advanceTimersByTime(750); });
     expect(screen.queryByRole('heading', { name: 'Welcome to your creator workspace' })).not.toBeInTheDocument();
+  });
+
+  it('remembers a decision locally when the server route is temporarily unavailable', async () => {
+    postMock.mockRejectedValue({ response: { status: 404, data: { error: { message: 'Route not found' } } } });
+    renderProvider();
+    await act(async () => { vi.advanceTimersByTime(750); });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Skip for now' }));
+      await Promise.resolve();
+    });
+    expect(localStorage.getItem('collabdock-product-tour-creator-uid-v1')).toBe('Skipped');
+    expect(screen.queryByText('Route not found')).not.toBeInTheDocument();
   });
 });
 
