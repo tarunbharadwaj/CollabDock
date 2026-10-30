@@ -74,7 +74,29 @@ export function LandingPage() {
         </section>
       </main>
 
-      <footer><Link className="brand" to="/"><BrandLogo className="brand-logo-footer"/></Link><p>Built thoughtfully for India&apos;s creator economy.</p><div><a href="#workflow">How it works</a><a href="#features">Features</a><a href="mailto:hello@collabdock.app">Contact</a></div><small>© 2026 CollabDock</small></footer>
+      <footer className="landing-footer">
+        <div className="landing-footer-main">
+          <div className="landing-footer-intro">
+            <Link className="brand" to="/" aria-label="CollabDock home"><BrandLogo className="brand-logo-footer" /></Link>
+            <p>Calm admin for independent creators managing brand deals.</p>
+          </div>
+          <nav className="landing-footer-nav" aria-label="Footer navigation">
+            <span>Explore</span>
+            <a href="#workflow">How it works</a>
+            <a href="#features">Features</a>
+            <a href="mailto:hello@collabdock.app">Contact</a>
+          </nav>
+          <div className="landing-footer-action">
+            <span>Ready when you are</span>
+            <Link to="/register">Join the free beta <ArrowRight size={16} /></Link>
+          </div>
+        </div>
+        <div className="landing-footer-bottom">
+          <small>© 2026 CollabDock</small>
+          <p>Built thoughtfully for India&apos;s creator economy.</p>
+          <span className="landing-footer-status"><i /> Free during beta</span>
+        </div>
+      </footer>
     </div>
   );
 }

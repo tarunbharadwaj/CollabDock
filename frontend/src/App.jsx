@@ -20,6 +20,7 @@ import { AdminCreatorsPage } from '@/pages/admin/AdminCreatorsPage';
 import { AdminCreatorDetailPage } from '@/pages/admin/AdminCreatorDetailPage';
 import { AdminCollaborationPage } from '@/pages/admin/AdminCollaborationPage';
 import { AdminAuditPage } from '@/pages/admin/AdminAuditPage';
+import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage';
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="creators/:uid" element={<AdminCreatorDetailPage/>}/>
             <Route path="creators/:uid/collaborations/:id" element={<AdminCollaborationPage/>}/>
             <Route path="audit" element={<AdminAuditPage/>}/>
+            <Route path="feedback" element={<AdminFeedbackPage/>}/>
           </Route>
         </Route>
         <Route element={<AuthGuard/>}>

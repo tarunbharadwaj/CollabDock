@@ -91,7 +91,7 @@ export function InvoicesPage() {
       )}
 
       {isLoading ? <Skeleton className="panel-skeleton"/> : (
-        <section className="invoice-library">
+        <section className="invoice-library" data-tour="invoice-workspace">
           <header className="invoice-library-header">
             <div><h2>Invoice library</h2><p>Your downloadable invoice history.</p></div>
             <span>{visibleInvoices.length} {visibleInvoices.length === 1 ? 'invoice' : 'invoices'}</span>

@@ -24,6 +24,24 @@ export const adminAuditQuerySchema = z.object({
   targetOwnerUid: z.string().trim().max(128).optional(),
 });
 
+export const adminFeedbackQuerySchema = z.object({
+  page,
+  limit,
+  search: z.string().trim().max(100).optional(),
+  status: z.enum(['New', 'Reviewed', 'Planned', 'Closed']).optional(),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  category: z.enum(['General', 'Bug', 'Confusing', 'Idea', 'Other']).optional(),
+  context: z.enum(['Collaboration Created', 'Payment Recorded', 'Invoice Created', 'Manual']).optional(),
+  from: z.iso.date().optional(),
+  to: z.iso.date().optional(),
+  sort: z.enum(['newest', 'oldest', 'rating-high', 'rating-low']).default('newest'),
+});
+
+export const adminFeedbackUpdateSchema = z.object({
+  status: z.enum(['New', 'Reviewed', 'Planned', 'Closed']).optional(),
+  internalNote: z.string().trim().max(2000).optional(),
+}).refine((value) => Object.keys(value).length > 0, 'Provide a status or internal note');
+
 export const adminProfileUpdateSchema = z.object({
   reason,
   changes: z.object({

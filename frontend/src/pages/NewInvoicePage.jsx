@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -9,16 +9,22 @@ import { api, apiMessage } from '@/services/api';
 import { useProfile } from '@/hooks/useProfile';
 import { inr, toPaisa } from '@/lib/format';
 import { Button, Input, MoneyInput, RequiredMark, Select, Textarea } from '@/components/ui';
+import { useProductExperience } from '@/context/ProductExperienceContext';
 
 export function NewInvoicePage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { signalMilestone } = useProductExperience();
   const { data: profile } = useProfile();
-  const { data: collaborations = [] } = useQuery({
-    queryKey: ['collaborations', 'invoice-picker'],
-    queryFn: async () => (await api.get('/collaborations', { params: { limit: 50 } })).data.data,
+  const { data: collaborations = [], isLoading: collaborationsLoading } = useQuery({
+    queryKey: ['collaborations', 'invoice-picker', 'active'],
+    queryFn: async () => (await api.get('/collaborations', { params: { paymentStatus: 'outstanding', limit: 50 } })).data.data,
   });
+  const activeCollaborations = useMemo(
+    () => collaborations.filter((item) => !['Completed', 'Cancelled'].includes(item.status) && item.paymentStatus !== 'Paid'),
+    [collaborations],
+  );
   const form = useForm({
     defaultValues: {
       collaborationId: params.get('collaboration') || '',
@@ -50,7 +56,12 @@ export function NewInvoicePage() {
   }, [profile, form]);
 
   useEffect(() => {
-    const item = collaborations.find((collaboration) => collaboration._id === watched.collaborationId);
+    if (collaborationsLoading) return;
+    const item = activeCollaborations.find((collaboration) => collaboration._id === watched.collaborationId);
+    if (watched.collaborationId && !item) {
+      form.setValue('collaborationId', '', { shouldDirty: false });
+      return;
+    }
     if (item) {
       form.setValue('billToName', item.brandName);
       form.setValue('billToEmail', item.brandEmail || '');
@@ -58,7 +69,7 @@ export function NewInvoicePage() {
       form.setValue('lineItems.0.description', item.campaignTitle ? `Content creation - ${item.campaignTitle}` : `Content creation services - ${item.brandName}`);
       form.setValue('lineItems.0.rate', item.dealValuePaisa / 100);
     }
-  }, [watched.collaborationId, collaborations, form]);
+  }, [watched.collaborationId, activeCollaborations, collaborationsLoading, form]);
 
   const total = watched.lineItems?.reduce(
     (sum, item) => sum + Number(item.quantity || 0) * Number(item.rate || 0),
@@ -82,6 +93,7 @@ export function NewInvoicePage() {
     onSuccess: () => {
       toast.success('Invoice created');
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      signalMilestone('Invoice Created');
       navigate('/app/invoices');
     },
     onError: (error) => toast.error(apiMessage(error)),
@@ -100,9 +112,22 @@ export function NewInvoicePage() {
           <section className="form-section">
             <div className="form-section-title"><span>01</span><div><h3>Invoice details</h3><p>Linking a collaboration fills brand and deal details automatically.</p></div></div>
             <div className="form-grid three">
-              <Select label="Collaboration" placeholder="No collaboration" {...form.register('collaborationId')}>
-                {collaborations.map((item) => <option key={item._id} value={item._id}>{item.brandName}</option>)}
-              </Select>
+              <div className="invoice-collaboration-picker">
+                <Select
+                  label="Collaboration"
+                  placeholder={collaborationsLoading ? 'Loading collaborations...' : activeCollaborations.length ? 'No collaboration' : 'No active collaborations'}
+                  disabled={collaborationsLoading || activeCollaborations.length === 0}
+                  {...form.register('collaborationId')}
+                >
+                  {activeCollaborations.map((item) => <option key={item._id} value={item._id}>{item.brandName}</option>)}
+                </Select>
+                {!collaborationsLoading && activeCollaborations.length === 0 && (
+                  <div className="invoice-collaboration-empty">
+                    <span>You can continue with a standalone invoice.</span>
+                    <Link to="/app/collaborations/new">Add collaboration</Link>
+                  </div>
+                )}
+              </div>
               <Input label="Invoice date" type="date" required {...form.register('invoiceDate')}/>
               <Input label="Due date" type="date" required {...form.register('dueDate')}/>
             </div>

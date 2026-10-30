@@ -6,6 +6,7 @@ import { Deliverable } from '../models/Deliverable.js';
 import { Payment } from '../models/Payment.js';
 import { Invoice } from '../models/Invoice.js';
 import { AuditLog } from '../models/AuditLog.js';
+import { Feedback } from '../models/Feedback.js';
 import { AppError } from '../utils/errors.js';
 import { invoiceNumber, paymentStatus } from '../utils/finance.js';
 import { auditAdminAction, safeAdminInvoice, safeAdminPayment, safeAdminUser, scrubAdminData } from '../services/auditService.js';
@@ -52,8 +53,9 @@ export async function reconcileCollaboration(collaborationId, session) {
   return collaboration;
 }
 
-export function adminMe(req, res) {
-  res.json({ data: { uid: req.user.uid, email: req.user.email, admin: true } });
+export async function adminMe(req, res) {
+  const newFeedbackCount = await Feedback.countDocuments({ status: 'New' });
+  res.json({ data: { uid: req.user.uid, email: req.user.email, admin: true, newFeedbackCount } });
 }
 
 export async function adminOverview(_req, res) {
@@ -174,6 +176,7 @@ export async function deleteAdminUser(req, res) {
       await Deliverable.deleteMany({ ownerUid: req.params.uid }).session(session);
       await Payment.deleteMany({ ownerUid: req.params.uid }).session(session);
       await Invoice.deleteMany({ ownerUid: req.params.uid }).session(session);
+      await Feedback.deleteMany({ ownerUid: req.params.uid }).session(session);
       await Collaboration.deleteMany({ ownerUid: req.params.uid }).session(session);
       await User.deleteOne({ uid: req.params.uid }).session(session);
     });

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AtSign, Building2, Check, LogOut, Moon, Palette, ReceiptText, Save, Sun, UserRound } from 'lucide-react';
+import { AtSign, Building2, Check, LogOut, MessageSquareHeart, Moon, Palette, ReceiptText, RotateCcw, Save, Sun, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useProfile } from '@/hooks/useProfile';
 import { api, apiMessage } from '@/services/api';
 import { Button, Input, PageHeader, Select, Skeleton, Textarea } from '@/components/ui';
+import { useProductExperience } from '@/context/ProductExperienceContext';
 
-const NICHE_OPTIONS = ['Fashion', 'Beauty', 'Lifestyle', 'Food', 'Travel', 'Technology', 'Fitness', 'Finance'];
+const NICHE_OPTIONS = ['Fashion', 'Beauty', 'Lifestyle', 'Food', 'Travel', 'Technology', 'Fitness', 'Finance', 'Skits'];
 
 function SettingsCard({ icon: Icon, tone, title, description, children, className = '' }) {
   return (
@@ -27,6 +28,7 @@ export function SettingsPage() {
   const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
+  const { openFeedback, startTour } = useProductExperience();
   const [nicheChoice, setNicheChoice] = useState('');
   const [customNiche, setCustomNiche] = useState('');
 
@@ -75,7 +77,7 @@ export function SettingsPage() {
     <div className="page settings-page">
       <PageHeader eyebrow="YOUR WORKSPACE" title="Settings" description="Manage your creator identity, invoice details, and app preferences."/>
 
-      <section className="settings-identity">
+      <section className="settings-identity" data-tour="workspace-settings">
         <span className="settings-avatar">{initials}</span>
         <div className="settings-identity-copy">
           <span>Creator profile</span>
@@ -113,7 +115,7 @@ export function SettingsPage() {
           <div id="invoice-defaults" className="settings-scroll-target">
             <SettingsCard icon={ReceiptText} tone="blue" title="Invoice defaults" description="Saved details used when you create a new invoice.">
               <div className="settings-fields">
-                <div className="settings-field-wide"><Input label="Business or creator name" name="businessName" defaultValue={data.businessName} placeholder="Your creator studio"/></div>
+                <div className="settings-field-wide"><Input label="Business or creator name" name="businessName" defaultValue={data.businessName} placeholder="Your creator studio" required/></div>
                 <div className="settings-field-wide"><Textarea label="Business address" name="businessAddress" rows="3" defaultValue={data.businessAddress} placeholder="Address shown on invoices"/></div>
                 <Input label="UPI ID" name="upiId" defaultValue={data.upiId} placeholder="name@upi"/>
                 <Input label="Invoice prefix" name="invoicePrefix" defaultValue={data.invoicePrefix} maxLength="8" hint="Example: INV"/>
@@ -149,6 +151,13 @@ export function SettingsPage() {
           <section className="settings-account-card">
             <div><span className="settings-account-icon"><LogOut size={18}/></span><span><strong>Account access</strong><small>Sign out of CollabDock on this browser.</small></span></div>
             <Button variant="secondary" onClick={logout}><LogOut size={16}/> Log out</Button>
+          </section>
+
+          <section className="settings-help-card">
+            <span className="settings-save-icon"><MessageSquareHeart size={18}/></span>
+            <div><strong>Help shape CollabDock</strong><p>Share feedback or take another look around the workspace.</p></div>
+            <Button variant="secondary" onClick={() => openFeedback('Manual')}><MessageSquareHeart size={16}/> Share feedback</Button>
+            <Button variant="ghost" onClick={() => startTour({ replay: true })}><RotateCcw size={16}/> Replay product tour</Button>
           </section>
         </aside>
       </form>

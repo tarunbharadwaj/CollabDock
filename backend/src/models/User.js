@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
   suspendedAt: { type: Date, default: null },
   suspendedByUid: { type: String, default: '' },
   suspensionReason: { type: String, default: '' },
+  productTourStatus: { type: String, enum: ['Not Seen', 'Completed', 'Skipped'], default: 'Not Seen' },
+  productTourVersion: { type: Number, default: 0, min: 0 },
+  productTourAcknowledgedAt: { type: Date, default: null },
+  lastFeedbackPromptAt: { type: Date, default: null },
 }, { timestamps: true });
 
 userSchema.index({ displayName: 'text', email: 'text', instagramHandle: 'text' });

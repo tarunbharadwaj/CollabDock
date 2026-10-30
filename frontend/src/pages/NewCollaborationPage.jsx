@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { CollaborationForm } from '@/features/collaborations/CollaborationForm';
 import { api, apiMessage } from '@/services/api';
 import { toPaisa } from '@/lib/format';
+import { useProductExperience } from '@/context/ProductExperienceContext';
 
 function payload(values) {
   const cleanDate = (value) => value || null;
@@ -24,12 +25,14 @@ function payload(values) {
 export function NewCollaborationPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { signalMilestone } = useProductExperience();
   const mutation = useMutation({
     mutationFn: (values) => api.post('/collaborations', payload(values)),
     onSuccess: () => {
       toast.success('Collaboration added');
       queryClient.invalidateQueries({ queryKey: ['collaborations'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      signalMilestone('Collaboration Created');
       navigate('/app/collaborations');
     },
     onError: (error) => toast.error(apiMessage(error)),

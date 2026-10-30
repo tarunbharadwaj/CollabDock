@@ -6,8 +6,27 @@ import { useProfile } from '@/hooks/useProfile';
 import { api } from '@/services/api';
 import { BrandLogo } from './BrandLogo';
 
-function FullLoader() {
-  return <div className="full-loader"><BrandLogo className="state-brand-logo"/><p>Preparing your workspace...</p></div>;
+function FullLoader({ startup = false }) {
+  if (startup) {
+    return (
+      <div className="service-startup" role="status" aria-live="polite">
+        <BrandLogo className="state-brand-logo" />
+        <span className="service-startup-kicker">Connecting securely</span>
+        <h1>Starting your workspace</h1>
+        <p>
+          CollabDock is waking up after a quiet period. This can take up to a minute,
+          and we will reconnect automatically.
+        </p>
+        <span className="service-startup-status">
+          <i aria-hidden="true" />
+          Preparing your creator workspace
+        </span>
+        <span className="service-startup-progress" aria-hidden="true"><i /></span>
+      </div>
+    );
+  }
+
+  return <div className="full-loader"><BrandLogo className="state-brand-logo"/><p>Checking your sign in...</p></div>;
 }
 
 function ProfileError({ error, retry, retrying, logout }) {
@@ -20,20 +39,20 @@ function ProfileError({ error, retry, retrying, logout }) {
     const result = await retry();
 
     if (result.isError) {
-      setRetryMessage('We still cannot connect. Please wait a moment and try again.');
+      setRetryMessage('The workspace is still starting. We will keep trying automatically.');
     }
   };
 
   return (
     <div className="route-error">
       <BrandLogo className="state-brand-logo"/>
-      <h1>{unauthenticated ? 'Please sign in again' : accountUnavailable ? 'Your account is unavailable' : "We couldn't load your workspace"}</h1>
+      <h1>{unauthenticated ? 'Please sign in again' : accountUnavailable ? 'Your account is unavailable' : 'CollabDock is taking longer than usual'}</h1>
       <p>
         {unauthenticated
           ? 'Your session has expired. Sign in again to continue.'
           : accountUnavailable
             ? 'Please contact CollabDock support if you believe this is a mistake.'
-          : 'Something went wrong while loading CollabDock. Please check your connection and try again.'}
+            : 'We will keep reconnecting automatically. You can also try again now.'}
       </p>
       {retryMessage && <p className="route-error-feedback" role="status">{retryMessage}</p>}
       <div>
@@ -61,7 +80,7 @@ export function OnboardingGuard() {
   const { logout } = useAuth();
   const { data, isLoading, isError, error, refetch, isFetching } = useProfile();
   const location = useLocation();
-  if (isLoading) return <FullLoader />;
+  if (isLoading) return <FullLoader startup />;
   if (isError) return <ProfileError error={error} retry={refetch} retrying={isFetching} logout={logout} />;
   if (!data?.onboardingCompleted && location.pathname !== '/onboarding') return <Navigate to="/onboarding" replace />;
   if (data?.onboardingCompleted && location.pathname === '/onboarding') return <Navigate to="/app" replace />;

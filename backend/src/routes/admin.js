@@ -24,6 +24,7 @@ import {
   voidAndRecreateAdminInvoice,
   listAdminAuditLogs,
 } from '../controllers/adminController.js';
+import { listAdminFeedback, updateAdminFeedback } from '../controllers/adminFeedbackController.js';
 import {
   adminUsersQuerySchema,
   adminResourceQuerySchema,
@@ -36,6 +37,8 @@ import {
   adminPaymentCreateSchema,
   adminPaymentUpdateSchema,
   adminInvoiceReplacementSchema,
+  adminFeedbackQuerySchema,
+  adminFeedbackUpdateSchema,
 } from '../validators/adminSchemas.js';
 
 export const adminRouter = Router();
@@ -61,3 +64,5 @@ adminRouter.patch('/payments/:id', validate(adminPaymentUpdateSchema), asyncHand
 adminRouter.delete('/payments/:id', validate(adminReasonSchema), asyncHandler(deleteAdminPayment));
 adminRouter.post('/invoices/:id/void-and-recreate', validate(adminInvoiceReplacementSchema), asyncHandler(voidAndRecreateAdminInvoice));
 adminRouter.get('/audit-logs', validate(adminAuditQuerySchema, 'query'), asyncHandler(listAdminAuditLogs));
+adminRouter.get('/feedback', validate(adminFeedbackQuerySchema, 'query'), asyncHandler(listAdminFeedback));
+adminRouter.patch('/feedback/:id', validate(adminFeedbackUpdateSchema), asyncHandler(updateAdminFeedback));
