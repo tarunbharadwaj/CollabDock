@@ -10,6 +10,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { inr, toPaisa } from '@/lib/format';
 import { Button, Input, MoneyInput, RequiredMark, Select, Textarea } from '@/components/ui';
 import { useProductExperience } from '@/context/ProductExperienceContext';
+import { trackEvent } from '@/lib/analytics';
 
 export function NewInvoicePage() {
   const [params] = useSearchParams();
@@ -93,6 +94,7 @@ export function NewInvoicePage() {
     onSuccess: () => {
       toast.success('Invoice created');
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      trackEvent('invoice_created', { linked_collaboration: Boolean(form.getValues('collaborationId')) });
       signalMilestone('Invoice Created');
       navigate('/app/invoices');
     },

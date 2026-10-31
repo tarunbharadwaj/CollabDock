@@ -108,6 +108,8 @@ Frontend (`frontend/.env`):
 | `VITE_API_BASE_URL` | Backend base URL ending in `/api/v1` |
 | `VITE_FIREBASE_*` | Firebase Web App public configuration |
 | `VITE_USE_FIREBASE_EMULATOR` | Optional local auth emulator switch |
+| `VITE_GA_MEASUREMENT_ID` | Optional GA4 web stream ID in `G-XXXXXXXXXX` format |
+| `VITE_GA_ENABLE_IN_DEV` | Optional switch for sending analytics from local development |
 
 Backend (`backend/.env`):
 
@@ -188,6 +190,15 @@ Administrator routes require a verified `admin: true` Firebase custom claim.
 1. Import the same repository. The root `netlify.toml` builds the frontend workspace, publishes the root `dist` directory, and includes the SPA fallback.
 2. Add every `VITE_*` value from `frontend/.env.example`; set `VITE_API_BASE_URL=https://<render-host>/api/v1`.
 3. Deploy, then add the Netlify hostname to Firebase Authorized domains and to Render's `FRONTEND_URL`.
+
+### Google Analytics 4
+
+1. In Google Analytics, create or open the CollabDock GA4 property and add a Web data stream for the production Netlify domain.
+2. Copy its Measurement ID and set `VITE_GA_MEASUREMENT_ID` in Netlify. Trigger a new deploy because Vite reads this value at build time.
+3. In the stream's Enhanced measurement settings, keep page loads enabled but disable page changes based on browser history. CollabDock sends sanitized SPA page views itself to avoid duplicate events and to keep record IDs out of Analytics.
+4. Verify the deployment with Google Tag Assistant and the GA4 Realtime or DebugView report.
+
+Analytics is disabled when the measurement ID is missing or invalid. Local development traffic is disabled unless `VITE_GA_ENABLE_IN_DEV=true`. The integration does not send creator emails, Firebase UIDs, database record IDs, brand names, deal values, payment references, or invoice contents. Google Signals and advertising personalization signals are disabled.
 
 ## Product constraints
 

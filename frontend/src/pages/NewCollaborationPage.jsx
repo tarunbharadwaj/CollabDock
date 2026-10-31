@@ -6,6 +6,7 @@ import { CollaborationForm } from '@/features/collaborations/CollaborationForm';
 import { api, apiMessage } from '@/services/api';
 import { toPaisa } from '@/lib/format';
 import { useProductExperience } from '@/context/ProductExperienceContext';
+import { trackEvent } from '@/lib/analytics';
 
 function payload(values) {
   const cleanDate = (value) => value || null;
@@ -32,6 +33,7 @@ export function NewCollaborationPage() {
       toast.success('Collaboration added');
       queryClient.invalidateQueries({ queryKey: ['collaborations'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      trackEvent('collaboration_created');
       signalMilestone('Collaboration Created');
       navigate('/app/collaborations');
     },

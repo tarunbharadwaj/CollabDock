@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, updateProfile } from '@firebase/auth';
+import { createUserWithEmailAndPassword, getAdditionalUserInfo, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, updateProfile } from '@firebase/auth';
 import { ArrowLeft, Check, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth, firebaseConfigured, googleProvider } from '@/lib/firebase';
 import { Button, Input, RequiredMark } from '@/components/ui';
 import { BrandLogo } from '@/components/BrandLogo';
+import { trackEvent } from '@/lib/analytics';
 
 function GoogleIcon() {
   return <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.25c0-.75-.06-1.3-.2-1.88H12v3.41h5.37a4.6 4.6 0 0 1-1.99 2.93v2.22h2.87c1.68-1.55 3.1-3.83 3.1-6.68Z"/><path fill="#34A853" d="M12 21.75c2.4 0 4.41-.79 5.88-2.15l-2.87-2.22c-.79.53-1.8.9-3.01.9-2.32 0-4.28-1.56-4.98-3.66H4.06v2.29A8.88 8.88 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M7.02 14.62A5.34 5.34 0 0 1 6.74 12c0-.91.16-1.79.44-2.62V7.09H4.06A9.76 9.76 0 0 0 3.1 12c0 1.77.44 3.44 1.22 4.91l2.7-2.29Z"/><path fill="#EA4335" d="M12 5.72c1.31 0 2.48.45 3.4 1.33l2.55-2.55A8.56 8.56 0 0 0 12 2.25a8.88 8.88 0 0 0-7.94 4.84l2.96 2.29c.7-2.1 2.66-3.66 4.98-3.66Z"/></svg>;
@@ -44,9 +45,11 @@ export function AuthPage({ mode }) {
       if (isRegister) {
         const result = await createUserWithEmailAndPassword(auth, values.email, values.password);
         await updateProfile(result.user, { displayName: values.name });
+        trackEvent('sign_up', { method: 'password' });
         navigate('/onboarding');
       } else {
         await signInWithEmailAndPassword(auth, values.email, values.password);
+        if (!isAdmin) trackEvent('login', { method: 'password' });
         navigate(destination);
       }
     } catch (error) {
@@ -60,7 +63,8 @@ export function AuthPage({ mode }) {
     if (!auth || !googleProvider) { toast.error('Authentication is not configured yet'); return; }
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      if (!isAdmin) trackEvent(getAdditionalUserInfo(result)?.isNewUser ? 'sign_up' : 'login', { method: 'google' });
       navigate(destination);
     } catch (error) {
       toast.error(authErrorMessage(error));

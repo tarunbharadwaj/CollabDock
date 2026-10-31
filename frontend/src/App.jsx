@@ -22,10 +22,12 @@ import { AdminCollaborationPage } from '@/pages/admin/AdminCollaborationPage';
 import { AdminAuditPage } from '@/pages/admin/AdminAuditPage';
 import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage';
 import { ContactPage } from '@/pages/ContactPage';
+import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <AnalyticsTracker/>
       <Routes>
         <Route path="/" element={<LandingPage/>}/>
         <Route path="/login" element={<AuthPage mode="login"/>}/>

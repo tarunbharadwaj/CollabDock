@@ -6,6 +6,7 @@ import { api, apiMessage } from '@/services/api';
 import { inr, toPaisa } from '@/lib/format';
 import { Button, Input, Modal, MoneyInput, Select, Textarea } from '@/components/ui';
 import { useProductExperience } from '@/context/ProductExperienceContext';
+import { trackEvent } from '@/lib/analytics';
 
 export function RecordPaymentModal({ collaboration, open, onClose }) {
   const queryClient = useQueryClient();
@@ -27,6 +28,7 @@ export function RecordPaymentModal({ collaboration, open, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['collaboration', collaboration._id] });
       queryClient.invalidateQueries({ queryKey: ['collaborations'] });
+      trackEvent('payment_recorded', { payment_type: isFullAmount ? 'full' : 'partial' });
       setAmount('');
       onClose();
       signalMilestone('Payment Recorded');

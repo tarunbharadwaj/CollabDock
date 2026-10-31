@@ -1,9 +1,11 @@
-import { ArrowLeft, Copy, HelpCircle, Mail, MessageCircleHeart, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Copy, ExternalLink, HelpCircle, Instagram, Linkedin, Mail, MessageCircleHeart, ShieldCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { BrandLogo } from '@/components/BrandLogo';
 
 const ADMIN_EMAIL = 'tarunbharadwaj10@gmail.com';
+const LINKEDIN_URL = 'https://www.linkedin.com/in/tarun-bharadwaj/';
+const INSTAGRAM_URL = 'https://www.instagram.com/build_with_tarun/';
 
 export function ContactPage() {
   const location = useLocation();
@@ -46,6 +48,25 @@ export function ContactPage() {
           <span className="contact-email-icon"><Mail size={21}/></span>
           <div><small>ADMIN EMAIL</small><strong>{ADMIN_EMAIL}</strong><p>Use this email for product questions, account support, and beta feedback.</p></div>
           <button type="button" className="contact-email-open" onClick={copyAdminEmail} aria-label="Copy admin email" title="Copy email"><Copy size={18}/></button>
+        </section>
+
+        <section className="contact-social-section" aria-labelledby="contact-social-title">
+          <div className="contact-social-heading">
+            <span id="contact-social-title">Connect online</span>
+            <small>Follow the journey and reach out directly.</small>
+          </div>
+          <div className="contact-social-grid">
+            <a className="contact-social-link linkedin" href={LINKEDIN_URL} target="_blank" rel="noreferrer">
+              <span className="contact-social-icon"><Linkedin size={19}/></span>
+              <span><small>LINKEDIN</small><strong>Tarun Bharadwaj</strong></span>
+              <ExternalLink size={16} aria-hidden="true"/>
+            </a>
+            <a className="contact-social-link instagram" href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
+              <span className="contact-social-icon"><Instagram size={19}/></span>
+              <span><small>INSTAGRAM</small><strong>@build_with_tarun</strong></span>
+              <ExternalLink size={16} aria-hidden="true"/>
+            </a>
+          </div>
         </section>
 
         <div className="contact-topics" aria-label="Reasons to contact CollabDock">
