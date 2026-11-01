@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BadgeIndianRupee, CalendarCheck2, Check, FileText, MessageCircleMore, Sparkles } from 'lucide-react';
+import { ArrowRight, BadgeIndianRupee, CalendarCheck2, Check, FileText, MessageCircleMore, PlayCircle, Sparkles } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
 
 const workflowSteps = [
@@ -22,7 +22,7 @@ export function LandingPage() {
     <div className="landing landing-refresh">
       <header className="landing-nav">
         <Link className="brand" to="/"><BrandLogo className="brand-logo-nav"/><small>beta</small></Link>
-        <nav><a href="#workflow">How it works</a><a href="#features">Features</a></nav>
+        <nav><a href="#demo">Demo</a><a href="#workflow">How it works</a><a href="#features">Features</a></nav>
         <div><Link className="text-link" to="/login">Log in</Link><Link className="button button-primary button-md" to="/register">Join free beta <ArrowRight size={16} /></Link></div>
       </header>
 
@@ -55,6 +55,39 @@ export function LandingPage() {
                 </section>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="product-demo" id="demo" aria-labelledby="product-demo-title">
+          <header className="product-demo-heading">
+            <div>
+              <span className="section-kicker"><PlayCircle size={14} /> 60-second product tour</span>
+              <h2 id="product-demo-title">See your creator business<br /><em>come together.</em></h2>
+            </div>
+            <p id="product-demo-copy">A quick look at how CollabDock keeps collaborations, invoices, and pending payments clear from one calm workspace.</p>
+          </header>
+          <div className="product-demo-frame">
+            <div className="product-demo-bar" aria-hidden="true">
+              <span /><span /><span />
+              <strong>CollabDock product demo</strong>
+              <small>1:00</small>
+            </div>
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              poster="/media/collabdock-product-demo-poster.jpg"
+              aria-label="Watch the 60-second CollabDock product demo"
+              aria-describedby="product-demo-copy"
+            >
+              <source src="/media/collabdock-product-demo.mp4" type="video/mp4" />
+              Your browser does not support embedded video. <a href="/media/collabdock-product-demo.mp4">Open the product demo</a>.
+            </video>
+          </div>
+          <div className="product-demo-meta">
+            <span><Check size={14} /> Real product workflows</span>
+            <span><Check size={14} /> Built for independent creators</span>
+            <span><Check size={14} /> One minute, start to finish</span>
           </div>
         </section>
 
