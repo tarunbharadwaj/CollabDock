@@ -12,8 +12,10 @@ import { listInvoices, createInvoice, getInvoice, deleteInvoice, downloadInvoice
 import { adminRouter } from './admin.js';
 import { acknowledgeProductTour, createFeedback, recordFeedbackPrompt } from '../controllers/experienceController.js';
 import { feedbackSchema, productTourSchema } from '../validators/feedbackSchemas.js';
+import { validateObjectIdParam } from '../middleware/objectId.js';
 
 export const apiRouter = Router();
+apiRouter.param('id', validateObjectIdParam);
 apiRouter.get('/health', (_req, res) => res.json({ status: 'ok', service: 'collabdock-api' }));
 apiRouter.use(requireAuth);
 apiRouter.use('/admin', requireAdmin, adminRouter);

@@ -72,7 +72,18 @@ export function AuthGuard() {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return <FullLoader />;
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  if (!user) {
+    const from = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to="/login" replace state={{ from }} />;
+  }
+  return <Outlet />;
+}
+
+export function GuestGuard({ redirectTo = '/app' }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return <FullLoader />;
+  if (user) return <Navigate to={redirectTo} replace />;
   return <Outlet />;
 }
 
@@ -99,7 +110,10 @@ export function AdminGuard() {
   });
 
   if (loading || (user && admin.isLoading)) return <FullLoader />;
-  if (!user) return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
+  if (!user) {
+    const from = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to="/admin/login" replace state={{ from }} />;
+  }
   if (admin.isError) {
     const forbidden = admin.error?.response?.status === 403;
     return (

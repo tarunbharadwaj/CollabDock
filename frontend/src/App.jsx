@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
 import { AdminShell } from '@/components/AdminShell';
-import { AdminGuard, AuthGuard, OnboardingGuard } from '@/components/RouteGuards';
+import { AdminGuard, AuthGuard, GuestGuard, OnboardingGuard } from '@/components/RouteGuards';
 import { LandingPage } from '@/pages/LandingPage';
 import { AuthPage } from '@/pages/AuthPages';
 import { OnboardingPage } from '@/pages/OnboardingPage';
@@ -30,10 +30,14 @@ export default function App() {
       <AnalyticsTracker/>
       <Routes>
         <Route path="/" element={<LandingPage/>}/>
-        <Route path="/login" element={<AuthPage mode="login"/>}/>
-        <Route path="/register" element={<AuthPage mode="register"/>}/>
-        <Route path="/forgot-password" element={<AuthPage mode="forgot"/>}/>
-        <Route path="/admin/login" element={<AuthPage mode="admin"/>}/>
+        <Route element={<GuestGuard/>}>
+          <Route path="/login" element={<AuthPage mode="login"/>}/>
+          <Route path="/register" element={<AuthPage mode="register"/>}/>
+          <Route path="/forgot-password" element={<AuthPage mode="forgot"/>}/>
+        </Route>
+        <Route element={<GuestGuard redirectTo="/admin"/>}>
+          <Route path="/admin/login" element={<AuthPage mode="admin"/>}/>
+        </Route>
         <Route element={<AdminGuard/>}>
           <Route path="/admin" element={<AdminShell/>}>
             <Route index element={<AdminOverviewPage/>}/>

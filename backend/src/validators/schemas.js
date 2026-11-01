@@ -4,6 +4,7 @@ import { COLLABORATION_STATUSES, DELIVERABLE_STATUSES } from '../utils/finance.j
 const optionalText = (max = 1000) => z.string().trim().max(max).optional();
 const dateField = z.union([z.iso.datetime(), z.iso.date(), z.literal(''), z.null()]).optional();
 const requiredDateField = z.union([z.iso.datetime(), z.iso.date()]);
+const objectId = z.string().trim().regex(/^[a-f\d]{24}$/i, 'Select a valid collaboration');
 
 export const profileSchema = z.object({
   displayName: z.string().trim().min(2).max(80),
@@ -68,7 +69,7 @@ export const paymentSchema = z.object({
 
 const party = z.object({ name: z.string().trim().min(2).max(160), email: z.union([z.email(), z.literal('')]).optional(), address: optionalText(500), phone: optionalText(30) });
 export const invoiceSchema = z.object({
-  collaborationId: z.string().optional().nullable(), invoiceDate: z.union([z.iso.datetime(), z.iso.date()]), dueDate: z.union([z.iso.datetime(), z.iso.date()]),
+  collaborationId: objectId.optional().nullable(), invoiceDate: z.union([z.iso.datetime(), z.iso.date()]), dueDate: z.union([z.iso.datetime(), z.iso.date()]),
   from: party, billTo: party,
   lineItems: z.array(z.object({ description: z.string().trim().min(2).max(500), quantity: z.number().positive(), ratePaisa: z.number().int().nonnegative() })).min(1).max(20),
   paymentInstructions: optionalText(1000), notes: optionalText(1000),

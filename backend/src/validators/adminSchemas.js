@@ -5,6 +5,7 @@ import { DELIVERABLE_STATUSES } from '../utils/finance.js';
 const reason = z.string().trim().min(10, 'Please provide a reason of at least 10 characters').max(500);
 const page = z.coerce.number().int().min(1).default(1);
 const limit = z.coerce.number().int().min(1).max(50).default(25);
+const objectId = z.string().trim().regex(/^[a-f\d]{24}$/i, 'Select a valid collaboration');
 
 export const adminUsersQuerySchema = z.object({
   page,
@@ -80,7 +81,7 @@ export const adminDeliverableUpdateSchema = z.object({
 
 export const adminPaymentCreateSchema = z.object({
   reason,
-  collaborationId: z.string().trim().min(1),
+  collaborationId: objectId,
   payment: paymentSchema,
 });
 

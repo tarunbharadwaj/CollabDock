@@ -40,8 +40,10 @@ import {
   adminFeedbackQuerySchema,
   adminFeedbackUpdateSchema,
 } from '../validators/adminSchemas.js';
+import { validateObjectIdParam } from '../middleware/objectId.js';
 
 export const adminRouter = Router();
+adminRouter.param('id', validateObjectIdParam);
 
 adminRouter.get('/me', adminMe);
 adminRouter.get('/overview', asyncHandler(adminOverview));

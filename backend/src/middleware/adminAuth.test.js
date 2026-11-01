@@ -15,8 +15,16 @@ describe('admin authentication boundaries', () => {
     const req = { headers: { authorization: 'Bearer valid-token' } };
     const next = vi.fn();
     await requireAuth(req, {}, next);
+    expect(firebaseAuth.verifyIdToken).toHaveBeenCalledWith('valid-token', true);
     expect(req.user).toEqual({ uid: 'admin-uid', email: 'admin@example.com', name: '', admin: true });
     expect(next).toHaveBeenCalledWith();
+  });
+
+  it('rejects revoked Firebase sessions', async () => {
+    firebaseAuth.verifyIdToken.mockRejectedValue({ code: 'auth/id-token-revoked' });
+    const next = vi.fn();
+    await requireAuth({ headers: { authorization: 'Bearer revoked-token' } }, {}, next);
+    expect(next.mock.calls[0][0]).toMatchObject({ status: 401, code: 'UNAUTHENTICATED' });
   });
 
   it('rejects authenticated users without the admin claim', () => {

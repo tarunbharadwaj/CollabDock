@@ -6,7 +6,7 @@ export async function requireAuth(req, _res, next) {
   try {
     const header = req.headers.authorization || '';
     if (!header.startsWith('Bearer ')) throw new AppError(401, 'Authentication required', 'UNAUTHENTICATED');
-    const decoded = await firebaseAuth.verifyIdToken(header.slice(7));
+    const decoded = await firebaseAuth.verifyIdToken(header.slice(7), true);
     req.user = { uid: decoded.uid, email: decoded.email || '', name: decoded.name || '', admin: decoded.admin === true };
     next();
   } catch (error) {
